@@ -338,6 +338,50 @@
     const mensaje = document.getElementById("mensaje");
     const modal = document.getElementById("detalleModal");
     const detalleContenido = document.getElementById("detalleContenido");
+    const empresaSelect = document.getElementById("empresa");
+    async function cargarEmpresas() {
+  try {
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/rutas_publicas?select=empresa&empresa=not.is.null&order=empresa.asc`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY
+        }
+      }
+    );
+
+    if (!respuesta.ok) {
+      throw new Error(`Error ${respuesta.status}`);
+    }
+
+    const registros = await respuesta.json();
+
+    // Elimina espacios, puntos finales y empresas repetidas.
+    const empresasUnicas = [
+      ...new Set(
+        registros
+          .map((fila) =>
+            String(fila.empresa || "")
+              .trim()
+              .replace(/[.\s]+$/, "")
+              .toUpperCase()
+          )
+          .filter(Boolean)
+      )
+    ].sort((a, b) => a.localeCompare(b, "es"));
+
+    empresasUnicas.forEach((empresa) => {
+      const opcion = document.createElement("option");
+      opcion.value = empresa;
+      opcion.textContent = empresa;
+      empresaSelect.appendChild(opcion);
+    });
+  } catch (error) {
+    console.error("No se pudo cargar el listado de empresas:", error);
+  }
+}
+
+cargarEmpresas();
 
     function mostrarMensaje(texto, tipo = "error") {
       mensaje.textContent = texto;
