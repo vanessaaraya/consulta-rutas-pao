@@ -91,19 +91,24 @@
       font-weight: 700;
       margin-bottom: 7px;
     }
+input,
+select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 1rem;
+  outline: none;
+  background: white;
+  font-family: inherit;
+}
 
-    input {
-      width: 100%;
-      padding: 12px 13px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: var(--secondary);
-      box-shadow: 0 0 0 3px rgba(11, 143, 163, 0.13);
+input:focus,
+select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 3px rgba(11, 143, 163, 0.13);
+}
+   ;
     }
 
     .actions {
