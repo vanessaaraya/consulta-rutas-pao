@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Rutas PAO</title>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --secondary: #0b8fa3;
+      --background: #f4f7fb;
+      --text: #162033;
+      --muted: #667085;
+      --border: #d9e1ec;
+      --danger: #b42318;
+      --success: #067647;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 34px 20px 72px;
+    }
+
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      opacity: 0.9;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.1rem);
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      opacity: 0.92;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: -42px auto 48px;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 14px 35px rgba(16, 24, 40, 0.12);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+    }
+
+    .helper {
+      color: var(--muted);
+      margin: 0 0 20px;
+      font-size: 0.92rem;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(11, 143, 163, 0.13);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .secondary-btn {
+      background: #eef2f7;
+      color: var(--text);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .message {
+      display: none;
+      padding: 13px 15px;
+      border-radius: 9px;
+      margin-bottom: 16px;
+      font-size: 0.93rem;
+    }
+
+    .message.error {
+      display: block;
+      color: var(--danger);
+      background: #fef3f2;
+      border: 1px solid #fecdca;
+    }
+
+    .message.success {
+      display: block;
+      color: var(--success);
+      background: #ecfdf3;
+      border: 1px solid #abefc6;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .detail-btn {
+      background: #e8f2fb;
+      color: var(--primary);
+      padding: 8px 11px;
+      font-size: 0.82rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 26px;
+    }
+
+    dialog {
+      width: min(680px, calc(100% - 28px));
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      box-shadow: 0 24px 60px rgba(16, 24, 40, 0.28);
+    }
+
+    dialog::backdrop {
+      background: rgba(16, 24, 40, 0.58);
+    }
+
+    .modal-head {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px 22px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .detail-item {
+      background: #f8fafc;
+      border-radius: 9px;
+      padding: 12px;
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+
+    .close-btn {
+      background: #eef2f7;
+      padding: 8px 12px;
+    }
+
+    @media (max-width: 760px) {
+      .filters { grid-template-columns: 1fr; }
+      .modal-body { grid-template-columns: 1fr; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">PLATAFORMA DE CONSULTA</p>
+      <h1>Consulta de Rutas PAO</h1>
+      <p class="subtitle">Registro de rutas para equipos y vehículos</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Filtros de búsqueda</h2>
+      <p class="helper">Completa al menos un campo y presiona Buscar.</p>
+
+      <div class="filters">
+        <div>
+          <label for="ppu">PPU o patente</label>
+          <input id="ppu" type="text" placeholder="Ej.: ABCD12" autocomplete="off" />
+        </div>
+
+        <div>
+          <label for="empresa">Empresa</label>
+          <input id="empresa" type="text" placeholder="Ej.: Bonatti" autocomplete="off" />
+        </div>
+
+        <div>
+          <label for="fecha">Fecha de salida</label>
+          <input id="fecha" type="date" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="buscarBtn" class="primary-btn">Buscar</button>
+        <button id="limpiarBtn" class="secondary-btn">Limpiar filtros</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Resultados</h2>
+      <p class="helper">La búsqueda muestra un máximo de 200 coincidencias.</p>
+      <div id="mensaje" class="message"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>PPU</th>
+              <th>Empresa</th>
+              <th>Conductor</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="resultados">
+            <tr><td colspan="7" class="empty">Ingresa un criterio para comenzar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="detalleModal">
+    <div class="modal-head">
+      <strong>Detalle de la ruta</strong>
+      <button class="close-btn" id="cerrarModal">Cerrar</button>
+    </div>
+    <div class="modal-body" id="detalleContenido"></div>
+  </dialog>
+
+  <script>
+    // REEMPLAZA ESTOS DOS VALORES CON LOS DATOS DE TU PROYECTO SUPABASE.
+    const SUPABASE_URL = "PEGA_AQUI_TU_PROJECT_URL";
+    const SUPABASE_KEY = "PEGA_AQUI_TU_PUBLISHABLE_KEY";
+
+    const buscarBtn = document.getElementById("buscarBtn");
+    const limpiarBtn = document.getElementById("limpiarBtn");
+    const resultados = document.getElementById("resultados");
+    const mensaje = document.getElementById("mensaje");
+    const modal = document.getElementById("detalleModal");
+    const detalleContenido = document.getElementById("detalleContenido");
+
+    function mostrarMensaje(texto, tipo = "error") {
+      mensaje.textContent = texto;
+      mensaje.className = `message ${tipo}`;
+    }
+
+    function ocultarMensaje() {
+      mensaje.textContent = "";
+      mensaje.className = "message";
+    }
+
+    function limpiarTexto(valor) {
+      return String(valor ?? "").trim();
+    }
+
+    function escaparHtml(valor) {
+      return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatearFecha(fecha) {
+      if (!fecha) return "";
+      const [anio, mes, dia] = fecha.split("-");
+      return `${dia}-${mes}-${anio}`;
+    }
+
+    function crearUrlConsulta() {
+      const ppu = limpiarTexto(document.getElementById("ppu").value);
+      const empresa = limpiarTexto(document.getElementById("empresa").value);
+      const fecha = limpiarTexto(document.getElementById("fecha").value);
+
+      if (!ppu && !empresa && !fecha) {
+        throw new Error("Debe ingresar al menos un criterio de búsqueda.");
+      }
+
+      if (
+        SUPABASE_URL.includes("PEGA_AQUI") ||
+        SUPABASE_KEY.includes("PEGA_AQUI")
+      ) {
+        throw new Error("Falta configurar la URL o la Publishable Key de Supabase.");
+      }
+
+      const params = new URLSearchParams();
+      params.set("select", "*");
+      params.set("order", "fecha_salida.desc");
+      params.set("limit", "200");
+
+      if (ppu) params.set("ppu", `ilike.*${ppu}*`);
+      if (empresa) params.set("empresa", `ilike.*${empresa}*`);
+      if (fecha) params.set("fecha_salida", `eq.${fecha}`);
+
+      return `${SUPABASE_URL}/rest/v1/rutas?${params.toString()}`;
+    }
+
+    async function buscarRutas() {
+      ocultarMensaje();
+      buscarBtn.disabled = true;
+      buscarBtn.textContent = "Buscando...";
+
+      try {
+        const url = crearUrlConsulta();
+        const respuesta = await fetch(url, {
+          method: "GET",
+          headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Accept": "application/json"
+          }
+        });
+
+        if (!respuesta.ok) {
+          const detalle = await respuesta.text();
+          throw new Error(`No fue posible consultar la base (${respuesta.status}). ${detalle}`);
+        }
+
+        const datos = await respuesta.json();
+        renderizarResultados(datos);
+
+        if (datos.length === 0) {
+          mostrarMensaje("No se encontraron registros con esos criterios.", "error");
+        } else {
+          mostrarMensaje(`Se encontraron ${datos.length} registro(s).`, "success");
+        }
+      } catch (error) {
+        resultados.innerHTML = `<tr><td colspan="7" class="empty">${escaparHtml(error.message)}</td></tr>`;
+        mostrarMensaje(error.message, "error");
+      } finally {
+        buscarBtn.disabled = false;
+        buscarBtn.textContent = "Buscar";
+      }
+    }
+
+    function renderizarResultados(datos) {
+      if (!datos.length) {
+        resultados.innerHTML = '<tr><td colspan="7" class="empty">Sin resultados.</td></tr>';
+        return;
+      }
+
+      resultados.innerHTML = datos.map((fila, indice) => `
+        <tr>
+          <td>${escaparHtml(formatearFecha(fila.fecha_salida))}</td>
+          <td>${escaparHtml(fila.ppu)}</td>
+          <td>${escaparHtml(fila.empresa)}</td>
+          <td>${escaparHtml(fila.conductor)}</td>
+          <td>${escaparHtml(fila.origen)}</td>
+          <td>${escaparHtml(fila.destino)}</td>
+          <td><button class="detail-btn" data-index="${indice}">Ver detalle</button></td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".detail-btn").forEach(boton => {
+        boton.addEventListener("click", () => {
+          const fila = datos[Number(boton.dataset.index)];
+          abrirDetalle(fila);
+        });
+      });
+    }
+
+    function abrirDetalle(fila) {
+      const campos = [
+        ["Fecha de salida", formatearFecha(fila.fecha_salida)],
+        ["Hora de salida", fila.hora_salida],
+        ["PPU", fila.ppu],
+        ["Empresa", fila.empresa],
+        ["Conductor", fila.conductor],
+        ["RUT", fila.rut],
+        ["Contrato", fila.contrato],
+        ["Paquete vertical", fila.paquete_vertical],
+        ["Tipo de vehículo", fila.tipo_vehiculo],
+        ["Tipo de transporte", fila.tipo_transporte],
+        ["Ruta", fila.ruta],
+        ["Origen", fila.origen],
+        ["Destino", fila.destino],
+        ["Regreso", fila.regreso],
+        ["Pernocta", fila.pernocta]
+      ];
+
+      detalleContenido.innerHTML = campos.map(([etiqueta, valor]) => `
+        <div class="detail-item">
+          <div class="detail-label">${escaparHtml(etiqueta)}</div>
+          <div>${escaparHtml(valor || "Sin información")}</div>
+        </div>
+      `).join("");
+
+      modal.showModal();
+    }
+
+    limpiarBtn.addEventListener("click", () => {
+      document.getElementById("ppu").value = "";
+      document.getElementById("empresa").value = "";
+      document.getElementById("fecha").value = "";
+      ocultarMensaje();
+      resultados.innerHTML = '<tr><td colspan="7" class="empty">Ingresa un criterio para comenzar.</td></tr>';
+    });
+
+    buscarBtn.addEventListener("click", buscarRutas);
+    document.getElementById("cerrarModal").addEventListener("click", () => modal.close());
+
+    modal.addEventListener("click", (evento) => {
+      const rect = modal.getBoundingClientRect();
+      const fuera =
+        evento.clientX < rect.left ||
+        evento.clientX > rect.right ||
+        evento.clientY < rect.top ||
+        evento.clientY > rect.bottom;
+      if (fuera) modal.close();
+    });
+  </script>
+</body>
+</html>
